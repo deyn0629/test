@@ -19,7 +19,7 @@ const mysql = require("mysql");
 const conn = mysql.createConnection({
   host: "kdt8.cfxcqwnoihhf.ap-northeast-2.rds.amazonaws.com",
   user: "admin",
-  password: "1234",
+  password: "651125dj",
   database: "kdt8",
   port: 3306,
 });
