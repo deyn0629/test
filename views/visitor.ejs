@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+     table {
+   width: 500px;
+    border: 1px solid #444444;
+    text-align: center;
+  }
+  th, td{
+    border: 1px solid #444444;
+  }
+    </style>
+  </head>
+  <body>
+    
+    <form name="visitor-form">
+      <fieldset>
+          <legend>방명록 등록</legend>
+          <input type="text" id="name" placeholder="사옹자 이름" ><br>
+          <input type="text" id="comment" placeholder="방명록"><br>
+          
+          <button type="button" id='getModify_btn' onclick="Register_user()">등록</button>
+      </fieldset>
+</form>
+<br>
+<br>
+   <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>작성자</th>
+        <th>방명록</th>
+        <th>수정</th>
+        <th>삭제</th>
+
+      </tr>
+    </thead>
+    <tbody>
+
+      <% for (let i=0; i<data.length; i++) { %>
+      <tr id="tr_<%= data[i].id %>">
+        <td><%= data[i].id %></td>
+        <td><%= data[i].name %></td>
+        <td><%= data[i].comment %></td>
+        <td><button type="button" id="getModify_btn" onclick="getModify('<%= data[i].name %>', '<%= data[i].comment %>','<%= data[i].id %>')">수정</button></td>
+       
+        <td><button type="buttonx" onclick="getdelete('<%= data[i].id %>')">삭제</button></td>
+      </tr>
+        <% } %>
+    </tbody>
+   </table>
+
+
+   <script>
+  const body = document.querySelector('tbody');
+   
+  function Register_user(){
+    const form =document.forms["visitor-form"]
+    
+    const data = {
+    name: form.name.value,
+    comment: form.comment.value
+
+   }
+    
+   
+   axios({
+    method: "POST",
+    url: "/visitor/register",
+    data: data,
+   }).then(function(res){
+        const html = `
+        <tr>
+            <td>${res.data.id}</td>
+            <td>${res.data.name}</td>
+            <td>${res.data.comment}</td>
+            
+           
+            <td><button type="button" id="getModify_btn" onclick="getModify('${res.data.name}','${res.data.comment}',${res.data.id})">수정</button></td>
+
+            <td><button type="button" onclick="getdelete(${res.data.id})">삭제</button></td>
+        </tr>`;
+       
+        body.insertAdjacentHTML('beforeend', html);
+        
+        const btn = document.getElementById('getModify_btn')
+        console.log('등록', btn)
+        btn.setAttribute('onclick', `Register_user()`)
+        btn.innerText='등록'
+        
+       
+   } )
+   }
+
+   //회원수정
+   function getModify(name, comment, id){
+    console.log(name, comment, id)
+    const name_input = document.getElementById('name');
+    const comment_input = document.getElementById('comment');
+  
+    name_input.setAttribute('value', name)
+    comment_input.setAttribute('value', comment)
+    
+    
+    const btn = document.getElementById('getModify_btn')
+    console.log('수정',btn)
+    btn.setAttribute('onclick', `Modify_input(${id})`)
+    btn.innerText='수정'
+  
+    
+
+  }
+  
+  
+  //다시 입력한 값 수정
+  function Modify_input(id){
+    const form =document.forms["visitor-form"]
+    
+    const data = {
+      name: form.name.value,
+      comment: form.comment.value,
+      id: Number(id)
+
+   }
+  
+   axios({
+    method: "patch",
+    url: "/visitor/modify",
+    data: data,
+   }).then(function(res){
+    console.log(res)
+    window.location.reload();
+
+   } )
+  }
+
+
+  function getdelete(id){
+    axios({
+                    method: 'delete',
+                    url: '/visitor/delete',
+                    data: {
+                        id: Number(id),
+                    },
+                }).then((res) => {
+                    window.location.reload();
+                    const btn = document.getElementById('getModify_btn')
+                    btn.setAttribute('onclick', `Modify_input(${id})`)
+                    btn.innerText='등록'
+                });
+            }
+  
+   </script>
+  </body>
+</html>
